@@ -1,199 +1,856 @@
-# DUREM AI 2.2
+# DUREM AI v2 🐶⚖️
 
-**Компанийн дүрэм мэддэг. Бас ярилцаж чаддаг local AI assistant.**
+> **Компанийн дүрэм мэддэг. Бас ярилцаж чаддаг local AI assistant.**
 
-DUREM AI нь хоёр тусдаа execution path-тай: company-policy асуултыг deterministic Rule Engine + RAG + exact-source validation-аар баталгаажуулж хариулна; ердийн chat, brainstorm, тайлбар, бичих тусламж, coding зэрэгт document retrieval шаардахгүйгээр local Qwen model-той natural conversation хийнэ.
+DUREM AI бол байгууллагын дотоод дүрэм, журам, зөвшөөрөл, процесс болон company knowledge-ийг ойлгодог **local-first AI assistant**.
 
-Employee тал нь ChatGPT-style chat интерфэйстэй, **“Дүрмээ”** нэртэй хуульч нохой mascot-тай. Admin тал нь knowledge base, decision rules, users/roles/departments, routing, knowledge gaps, audit, security, backup/restore-ийг нэг дор удирдана.
-
-DUREM нь ERP шаарддаггүй. OpenAI/Claude/Gemini API ашигладаггүй. Үндсэн deployment-д application data, document, conversation, audit, model inference бүгд байгууллагын орчинд үлдэнэ.
-
-## DUREM юу хийдэг вэ?
-
-Ажилтан:
-
-> Би харилцагчид 8% хөнгөлөлт шууд өгч болох уу?
-
-DUREM:
+Ердийн асуулт дээр ChatGPT-style assistant шиг ярилцана.  
+Компанийн дүрэмтэй холбоотой асуулт орж ирвэл автоматаар secure policy engine рүү шилжиж, зөвхөн баталгаатай дүрэм болон эх сурвалж дээр үндэслэн хариулна.
 
 ```text
-ЗӨВШӨӨРӨЛ ШААРДЛАГАТАЙ
-
-5%-иас дээш, 10% хүртэлх хөнгөлөлтөд
-борлуулалтын менежерийн зөвшөөрөл шаардлагатай.
-
-Хандах: Борлуулалтын менежер
-Эх сурвалж: discount-002
+User
+ ↓
+Hybrid Router
+ ├── General Chat
+ │      ↓
+ │   Local Qwen
+ │   + Conversation History
+ │   + Personal Memory
+ │
+ └── Company / Policy
+        ↓
+     Rule Engine
+        ↓
+     RAG + ACL
+        ↓
+     Local Qwen
+        ↓
+     Source Validation
 ```
 
-Хариултын төлөв:
+---
 
-- `ALLOWED`
-- `DENIED`
-- `APPROVAL_REQUIRED`
-- `NOT_FOUND`
+## ✨ Гол боломжууд
 
-Critical numeric rule (%, MNT, number threshold) таарвал **Python rule engine** шийднэ. Natural-language policy/process/routing асуултыг local Qwen model + RAG шийднэ. Баталгаатай эх сурвалжгүй бол `NOT_FOUND` руу fail-safe хийнэ.
+- 🧠 **Local AI** — AI inference локал төхөөрөмж дээр ажиллана
+- 🔀 **Hybrid Router** — ердийн chat болон company-policy асуултыг автоматаар ялгана
+- 🛡️ **Safety Override** — Chat mode сонгосон байсан ч company-policy асуултыг secure policy mode руу шилжүүлнэ
+- 📚 **Company Knowledge RAG** — компанийн document-оос relevant мэдээлэл хайна
+- ✅ **Exact Source Validation** — AI зохиомол source ашиглах боломжгүй
+- 🚫 **Fail-safe Answers** — баталгаатай мэдээлэл байхгүй бол дүрэм зохиохын оронд `NOT_FOUND`
+- ⚙️ **Deterministic Rule Engine** — critical numeric/approval rule-үүдийг LLM-д бүрэн даатгахгүй
+- 🔐 **Document ACL** — хэрэглэгч зөвшөөрөлтэй document-оо л AI-аар ашиглуулна
+- 📅 **Effective Date Protection** — хуучирсан policy-г current policy гэж ашиглахаас хамгаална
+- 💬 **Natural AI Chat** — coding, brainstorm, writing, translation, explanation зэрэг ердийн AI боломжууд
+- 🧠 **Personal Memory** — хэрэглэгчийн нэр, хэл, response preference зэрэг context-ийг санана
+- 🔒 **Secure Memory** — password, token, API key зэрэг sensitive мэдээллийг хадгалахгүй
+- 👤 **User Isolation** — хэрэглэгч бүрийн conversation, memory, session тусдаа
+- 📊 **Audit & Knowledge Gaps** — хариулж чадаагүй company question-уудыг admin илрүүлж чадна
+- 📱 **App-ready API** — desktop/mobile app хийхэд зориулсан `/api/v1`
+- 🔑 **Bearer Authentication** — app client-д зориулсан token-based authentication
+- 💻 **Device Sessions** — device/session revoke болон token expiration
+- 💾 **Backup / Restore**
+- 🏢 **Admin Console**
 
-### Hybrid universal router
+---
 
-```text
-User message
-   ↓
-Server-side Router
-   ├─ deterministic guard (clear cases)
-   ├─ local Qwen classifier (ambiguous cases only)
-   └─ conservative safety fallback
-          ↓
-   ├─ Company / policy → Rule Engine → RAG/ACL → Qwen JSON → source validation
-   └─ General chat     → recent chat history + personal memory → Qwen natural response
-```
+# 🤖 Local AI Stack
 
-Router нь `discount`, `leave`, `car` гэх мэт тусгай checker-үүдийн цуглуулга биш. Company authority/permission/internal-process гэсэн generic signal-уудыг ашиглана. Тодорхой prompt дээр нэмэлт LLM inference хийхгүй; зөвхөн ambiguous prompt local Qwen classifier руу орно. `Auto` mode нь company authority/permission асуултад policy path руу safety-biased routing хийнэ. User `Ердийн чат` сонгосон байсан ч company-policy signal илэрвэл server policy path руу override хийнэ.
-
-Policy follow-up (`Тэгвэл 12% бол?`) дээр өмнөх user question-оос topic-оо сэргээж retrieval-ийг **шинээр** ажиллуулна; өмнөх AI answer-ийг authority/source гэж ашиглахгүй.
-
-### App API v1
-
-DUREM 2.2 нь mobile/desktop app-д зориулсан versioned API-тай. Browser UI cookie + CSRF-ээ хэвээр ашиглана; first-party app client `/api/v1/...` + Bearer token ашиглана. Raw API token database-д хадгалагдахгүй, зөвхөн hash + expiry/device metadata хадгална.
-
-Гол endpoints:
-
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/change-password`
-- `GET /api/v1/auth/sessions`
-- `POST /api/v1/assistant/ask`
-- `POST /api/v1/assistant/route` (optional route preview)
-- `GET /api/v1/conversations`
-- `GET /api/v1/memory`
-- `GET /api/v1/documents/{id}/preview`
-- `POST /api/v1/feedback`
-- `GET /api/v1/health`
-
-Дэлгэрэнгүй: [`API.md`](API.md).
-
-### Personal memory
-
-DUREM user бүрийн explicit preference/context-ийг local SQLite-д тусгаарлан хадгалж чадна. Жишээ: preferred name, response style, language, tone.
-
-- memory нь user-owned, per-account
-- company policy/approval authority-г memory болгохгүй
-- password, token, API key, OTP зэрэг credential хадгалахгүй
-- `Намайг юу санаж байна?`, `...-г март`, `memory-г бүгдийг март` командуудтай
-- general-chat audit default-аар raw prompt хадгалахгүй
-
-## Гол боломжууд
-
-### Employee workspace
-
-- Clean ChatGPT-style conversation UI
-- `Автомат / Компанийн дүрэм / Ердийн чат` mode switch
-- Natural multi-turn general chat
-- Server-side company-policy safety override
-- Per-user personal memory
-- “Дүрмээ” lawyer-dog mascot
-- Шинэ chat + conversation history
-- Decision cards + confidence
-- Approver + next steps
-- Source cards + document preview/download
-- Answer feedback
-- Password change
-- Responsive mobile layout
-
-### Admin console
-
-- Overview / runtime health
-- Knowledge base
-- Knowledge Health score + issues
-- PDF / DOCX / XLSX / TXT / MD / CSV upload
-- Document version / effective date / archive / activate / reindex
-- Department/admin/all visibility
-- Rule builder
-- Deterministic percent/MNT/number thresholds
-- Users / roles / departments
-- Responsible-person routing
-- Knowledge gaps from `NOT_FOUND`
-- Audit trail
-- Security Center
-- Active session revoke
-- AI/model settings + hybrid routing / memory / app API / audit privacy controls
-- AES-256-GCM encrypted backup + validated restore
-
-### Local AI
-
-Default:
+DUREM-ийн default local AI configuration:
 
 ```text
 LLM:       Qwen3-8B-GGUF
 Embedding: Qwen3-Embedding-0.6B-GGUF
 Runtime:   Lemonade Server
+Backend:   FastAPI / Python
+Database:  SQLite
+Frontend:  Local Web UI
 ```
 
-DUREM talks to Lemonade through its local OpenAI-compatible API.
+DUREM нь Lemonade-ийн local OpenAI-compatible API-тай холбогдоно.
 
-The application intentionally rejects a public/external AI endpoint by default. `LEMONADE_BASE_URL` must be loopback/private/local unless the operator explicitly sets `DUREM_ALLOW_EXTERNAL_AI=true`.
+Default:
 
-## Windows quick start
+```text
+http://127.0.0.1:13305
+```
 
-### 1. Lemonade / model
+Cloud OpenAI / Claude / Gemini API заавал шаардлагагүй.
 
-Your current Ryzen + Radeon setup can use Vulkan acceleration.
+---
+
+# 🚀 Windows Installation
+
+## 1. Requirements
+
+Эхлээд дараах зүйлс хэрэгтэй:
+
+- Windows
+- Python **3.11+**
+- Lemonade Server
+- DUREM AI source
+
+---
+
+## 2. Install Lemonade
+
+Windows-д Lemonade Server-ийн installer суулгана.
+
+Lemonade суусны дараа PowerShell нээгээд шалга:
+
+```powershell
+lemonade status
+```
+
+эсвэл:
+
+```powershell
+lemonade list
+```
+
+Command ажиллаж байвал Lemonade CLI бэлэн гэсэн үг.
+
+---
+
+## 3. Install local AI backend
+
+AMD / Radeon GPU ашиглаж байгаа бол Vulkan backend:
 
 ```powershell
 lemonade backends install llamacpp:vulkan
+```
+
+DUREM-д хэрэгтэй chat model:
+
+```powershell
 lemonade pull Qwen3-8B-GGUF
+```
+
+Embedding model:
+
+```powershell
 lemonade pull Qwen3-Embedding-0.6B-GGUF
 ```
 
-Optional helper:
+Шалгах:
+
+```powershell
+lemonade list
+```
+
+---
+
+## 4. Optional AMD setup helper
+
+DUREM folder дотор:
 
 ```powershell
 .\setup-amd-windows.ps1
 ```
 
-### 2. DUREM setup
+ажиллуулж болно.
 
-Recommended on Windows: double-click `setup.bat`. It runs the setup with an execution-policy bypass only for that child PowerShell process; it does not permanently change the machine policy.
+---
 
-Or from PowerShell:
+# 🐶 Install DUREM AI
+
+ZIP татсан бол эхлээд **Extract All** хийнэ.
+
+Folder дотор PowerShell нээнэ.
+
+Жишээ:
 
 ```powershell
-cd DUREM-AI-2.2
+cd "$HOME\Downloads\DUREM-AI-2.2.0-rc1"
+```
+
+---
+
+## 1. Setup
+
+Хамгийн амархан арга:
+
+```text
+setup.bat
+```
+
+дээр double-click.
+
+Эсвэл PowerShell:
+
+```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
-`setup.ps1` is Windows PowerShell 5.1 compatible and is saved with a UTF-8 BOM so Mongolian setup text renders correctly on legacy Windows PowerShell.
+Setup автоматаар:
 
-Setup asks for:
+```text
+✓ Python шалгана
+✓ Virtual environment үүсгэнэ
+✓ Dependencies суулгана
+✓ Secure .env үүсгэнэ
+✓ Database initialize хийнэ
+✓ Initial admin account үүсгэнэ
+✓ Lemonade байгаа эсэхийг шалгана
+```
 
-- company name
-- local/LAN bind mode
-- trusted host values
-- strong admin password
+Setup үед:
 
-It generates a random application secret and removes the bootstrap password from `.env` after the initial admin is created.
+```text
+Company name
+Bind host
+Admin password
+```
 
-### 3. Start
+асууна.
+
+Local computer дээр ажиллуулах бол:
+
+```text
+Bind host: 127.0.0.1
+```
+
+---
+
+## 2. Password requirement
+
+Admin password:
+
+```text
+12+ characters
+```
+
+мөн дор хаяж 3 төрлийн character ашиглана:
+
+```text
+Uppercase
+Lowercase
+Number
+Special character
+```
+
+Жишээ:
+
+```text
+DuremAdmin#2026
+```
+
+> Энэ бол зөвхөн жишээ. Production дээр өөр strong password ашиглана уу.
+
+---
+
+# ▶️ Start DUREM
+
+Setup дууссаны дараа:
 
 ```powershell
 .\start.ps1
 ```
 
-Default local URL:
+Хэрэв PowerShell execution policy block хийвэл:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+дараа нь:
+
+```powershell
+.\start.ps1
+```
+
+Эсвэл нэг командаар:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start.ps1
+```
+
+---
+
+# 🌐 Open DUREM
+
+Default URL:
 
 ```text
 http://127.0.0.1:8080
 ```
 
-Diagnostics:
+Browser автоматаар нээгдэх ёстой.
+
+---
+
+# 🩺 Diagnostics
+
+Асуудал гарвал:
 
 ```powershell
 .\diagnose.ps1
 ```
 
-`start.ps1` attempts to load the configured local model before starting DUREM.
+эсвэл:
 
-## Linux quick start
+```text
+diagnose.bat
+```
+
+---
+
+# 💬 Assistant Modes
+
+DUREM үндсэн 3 mode-той.
+
+### Автомат
+
+```text
+Автомат
+```
+
+Router асуултыг өөрөө шалгаад Chat эсвэл Policy engine рүү явуулна.
+
+### Компанийн дүрэм
+
+```text
+Компанийн дүрэм
+```
+
+Company rule, permission, approval, procedure зэрэг асуултад зориулагдсан.
+
+### Ердийн чат
+
+```text
+Ердийн чат
+```
+
+General AI assistant.
+
+Жишээ:
+
+```text
+FastAPI гэж юу вэ?
+```
+
+```text
+Энэ email-ийг professional болгоод өг.
+```
+
+```text
+Шинэ бүтээгдэхүүний нэр brainstorm хийе.
+```
+
+---
+
+# 🔀 Hybrid Router
+
+DUREM prompt бүрийг шууд RAG руу явуулдаггүй.
+
+```text
+Prompt
+ ↓
+Deterministic Router
+ ↓
+Clear?
+ ├── YES → Chat / Policy
+ │
+ └── NO
+      ↓
+   Local Qwen Classifier
+      ↓
+   Chat / Policy
+```
+
+Жишээ:
+
+```text
+Python async гэж юу вэ?
+→ CHAT
+```
+
+```text
+Би энэ purchase-ийг өөрөө approve хийж болох уу?
+→ POLICY
+```
+
+Router нь зөвхөн `discount` зэрэг нэг keyword-д зориулагдаагүй.
+
+Company:
+
+```text
+permissions
+approvals
+procedures
+responsibilities
+finance
+HR
+legal
+security
+IT
+operations
+assets
+company rules
+```
+
+зэрэг олон төрлийн асуултыг ялгана.
+
+---
+
+# 🛡️ Safety Override
+
+Хэрэглэгч **Ердийн чат** mode сонгосон байсан ч:
+
+```text
+Манай компанийн дүрмээр
+энэ худалдан авалтыг би өөрөө approve хийж болох уу?
+```
+
+гэж асуувал DUREM:
+
+```text
+Chat
+ ↓
+Company-sensitive question detected
+ ↓
+POLICY MODE
+```
+
+болгон автоматаар шилжүүлнэ.
+
+UI дээр:
+
+```text
+Дүрэм рүү автоматаар шилжүүлэв
+```
+
+гэж харуулна.
+
+---
+
+# 📚 Company Knowledge + RAG
+
+Company question дээр:
+
+```text
+Question
+ ↓
+User access
+ ↓
+Rule Engine
+ ↓
+Relevant documents
+ ↓
+ACL filter
+ ↓
+Effective-date filter
+ ↓
+Local Qwen
+ ↓
+Source validation
+ ↓
+Answer
+```
+
+---
+
+# ✅ Source Validation
+
+DUREM company policy дээр AI-ийн хэлсэн source ID-г backend дээр дахин шалгана.
+
+```text
+LLM source
+ ↓
+Retrieved sources дотор байна уу?
+ ↓
+YES → answer
+NO  → reject / safe fallback
+```
+
+AI source зохиогоод policy answer гаргах боломжийг багасгана.
+
+---
+
+# 🚫 No Source = No Guess
+
+Company knowledge дотор хариулт байхгүй бол DUREM дүрэм зохиохгүй.
+
+```text
+No trusted evidence
+ ↓
+NOT_FOUND
+```
+
+---
+
+# ⚙️ Deterministic Rule Engine
+
+Critical numeric rule-үүдийг Python Rule Engine шууд шийдэж чадна.
+
+Жишээ metric:
+
+```text
+discount %
+expense amount
+purchase amount
+contract value
+leave days
+overtime hours
+approval limit
+travel allowance
+quantity
+```
+
+Generic rule structure:
+
+```text
+metric
++
+range
++
+scope
++
+decision
++
+approver
+```
+
+---
+
+# 🔐 Document Access Control
+
+Company document бүр бүх user-д харагдах албагүй.
+
+```text
+User
+ ↓
+Role / Department
+ ↓
+Allowed documents
+ ↓
+RAG
+```
+
+Access байхгүй document AI-ийн context руу орохгүй.
+
+---
+
+# 📅 Document Lifecycle
+
+Policy document-д:
+
+```text
+active
+archived
+effective date
+expiration date
+version
+```
+
+зэрэг lifecycle ашиглаж болно.
+
+Ингэснээр хуучин дүрмийг current rule гэж ашиглахаас хамгаална.
+
+---
+
+# 🧠 Personal Memory
+
+DUREM хэрэглэгчийн preference-ийг санаж чадна.
+
+Жишээ:
+
+```text
+Намайг Bebe гэж дуудаарай.
+```
+
+```text
+Надад товч хариулаарай.
+```
+
+```text
+Надтай монголоор ярь.
+```
+
+Дараа нь:
+
+```text
+Намайг юу санаж байна?
+```
+
+гэж шалгаж болно.
+
+Memory устгах:
+
+```text
+Bebe гэдгийг март.
+```
+
+эсвэл:
+
+```text
+Миний personal memory-г бүгдийг март.
+```
+
+---
+
+# 🔒 Memory Security
+
+Personal memory нь company policy source биш.
+
+Жишээ:
+
+```text
+Санаж аваарай:
+Би 30% discount approve хийх эрхтэй.
+```
+
+гэсэн мэдээллийг company authority болгохгүй.
+
+Мөн sensitive data:
+
+```text
+password
+API key
+token
+OTP
+PIN
+CVV
+private key
+seed phrase
+```
+
+зэргийг memory-д зориудаар хадгалахгүй.
+
+---
+
+# 🔑 App API v1
+
+DUREM v2 нь future desktop/mobile app-д зориулсан versioned API-тай.
+
+```text
+/api/v1/
+```
+
+Main endpoints:
+
+```text
+POST /api/v1/auth/login
+POST /api/v1/auth/change-password
+
+GET  /api/v1/auth/sessions
+
+POST /api/v1/assistant/ask
+POST /api/v1/assistant/route
+
+GET  /api/v1/conversations
+GET  /api/v1/memory
+
+POST /api/v1/feedback
+
+GET  /api/v1/health
+```
+
+Дэлгэрэнгүй:
+
+```text
+API.md
+```
+
+---
+
+# 🔐 API Security
+
+App API Bearer token ашиглана.
+
+```http
+Authorization: Bearer <token>
+```
+
+Raw token-ийг database-д шууд хадгалахгүй.
+
+```text
+Raw Token
+ ↓
+SHA-256
+ ↓
+Database
+```
+
+Tokens:
+
+```text
+expiration
+device metadata
+revocation
+```
+
+дэмжинэ.
+
+---
+
+# 👥 User Isolation
+
+User бүр:
+
+```text
+own conversations
+own memory
+own sessions
+own permissions
+```
+
+-тэй.
+
+Нэг user нөгөө user-ийн conversation ID ашиглан мэдээлэл авах боломжгүй байхаар ownership checks хийгдсэн.
+
+---
+
+# 📊 Admin Console
+
+Admin дараах зүйлсийг удирдана:
+
+### Knowledge
+
+```text
+Documents
+Versions
+Effective dates
+Visibility
+Reindex
+Archive
+Activate
+Knowledge Health
+```
+
+### Organization
+
+```text
+Users
+Roles
+Departments
+Responsible people
+```
+
+### Rules
+
+```text
+Decision rules
+Numeric thresholds
+Approval routing
+```
+
+### AI
+
+```text
+General Chat
+Hybrid Router
+Personal Memory
+Chat History
+Models
+Embedding
+App API
+```
+
+### Security
+
+```text
+Audit
+Sessions
+Token settings
+Chat privacy
+Backups
+Security status
+```
+
+---
+
+# 🔍 Knowledge Gaps
+
+Company-policy question-д valid answer олдоогүй бол:
+
+```text
+NOT_FOUND
+```
+
+гэсэн асуултыг admin талд Knowledge Gap болгон review хийж болно.
+
+Ингэснээр байгууллага:
+
+> “Манай knowledge base-д яг ямар мэдээлэл дутагдаж байна?”
+
+гэдгийг олж чадна.
+
+---
+
+# 💾 Data
+
+Default local database:
+
+```text
+SQLite
+```
+
+DUREM runtime data:
+
+```text
+users
+company rules
+documents
+conversations
+personal memory
+audit
+sessions
+API tokens
+```
+
+local environment-д хадгалагдана.
+
+---
+
+# 🔒 Security Design
+
+DUREM-ийн security model-д:
+
+- Password hashing
+- Secure sessions
+- CSRF protection
+- Login throttling
+- Assistant rate limiting
+- Trusted-host validation
+- Content Security Policy
+- Document ACL
+- File upload validation
+- Path traversal protection
+- Local AI endpoint restriction
+- API token hashing
+- Token expiration
+- Token revocation
+- User isolation
+- Audit logging
+- Encrypted backup / validated restore
+- Personal-memory safety
+- Policy source validation
+
+орно.
+
+---
+
+# 📁 Supported Knowledge Files
+
+Admin Knowledge Base:
+
+```text
+PDF
+DOCX
+XLSX
+TXT
+MD
+CSV
+```
+
+төрлийн document оруулж болно.
+
+---
+
+# 🐧 Linux
+
+Linux дээр:
 
 ```bash
 chmod +x setup.sh start.sh
@@ -201,168 +858,88 @@ chmod +x setup.sh start.sh
 ./start.sh
 ```
 
-For actual LAN use, read [DEPLOYMENT.md](DEPLOYMENT.md) first.
+LAN / production deployment хийхээс өмнө:
 
-## Docker
+```text
+DEPLOYMENT.md
+SECURITY.md
+```
 
-Docker mode expects Lemonade on the host machine by default.
+файлуудыг уншина уу.
+
+---
+
+# 🐳 Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-The container runs as a non-root user, drops capabilities, uses a read-only root filesystem, and stores DUREM runtime data in a named volume.
+Docker deployment үед Lemonade runtime host/local AI environment-тэй зөв тохируулагдсан байх шаардлагатай.
 
-Before LAN deployment, create a real `.env` with a strong random secret and explicit trusted hosts.
+---
 
-## First configuration workflow
+# 📱 Future Apps
 
-1. **Admin → Organization**: departments, roles, employees.
-2. **Admin → Knowledge**: approved policies/documents upload.
-3. Archive outdated versions; keep only the effective version active.
-4. **Admin → Decision Rules**: critical permissions/thresholds as explicit rules.
-5. **Admin → Routing**: HR, Legal, Finance, IT etc. responsible people.
-6. **Admin → Knowledge gaps**: unanswered questions review.
-7. **Admin → Security**: security score/actions review.
-8. Test with real employee accounts and real questions.
+DUREM-ийн AI logic backend дээр төвлөрсөн.
 
-## Knowledge pipeline
+Тиймээс дараа нь:
 
 ```text
-Approved file
-   ↓
-Upload validation
-   ↓
-Text extraction
-   ↓
-Sections + chunking
-   ↓
-Local embeddings (optional)
-   ↓
-Hybrid lexical + semantic retrieval
-   ↓
-Role/department ACL + lifecycle filter
-   ↓
-Rule Engine OR Local LLM
-   ↓
-Source validation
-   ↓
-Employee answer
+Desktop App
+Mobile App
+Tauri
+Electron
+Flutter
+React Native
 ```
 
-If the embedding runtime is unavailable, document ingestion falls back to lexical indexing instead of destroying the upload.
-
-## Decision safety model
-
-DUREM does not ask the LLM to freely invent company decisions.
+зэрэг client хийхдээ AI logic-оо дахин бичих шаардлагагүй.
 
 ```text
-Question
-  ↓
-User role + department
-  ↓
-Relevant rules/documents/routing
-  ↓
-Exact numeric rule available?
-  ├─ YES → deterministic code decision
-  └─ NO  → local Qwen + strict structured schema
-                 ↓
-          exact-source validation
-                 ↓
-       insufficient evidence?
-          └─ NOT_FOUND
+App
+ ↓
+DUREM API
+ ↓
+Hybrid Router
+ ├── Chat → Local Qwen
+ └── Policy → Rules + RAG + Sources
 ```
 
-Retrieved document text is treated as **untrusted data**. Prompt-injection-like instructions inside uploaded documents are not supposed to override DUREM's system contract.
+---
 
-## Security highlights
+# 🧪 Testing
 
-- Argon2id password hashing
-- automatic legacy PBKDF2/scrypt hash upgrade
-- HttpOnly + SameSite=Strict signed session cookie
-- server-side sessions with absolute + idle expiry
-- max sessions per user
-- CSRF token on state-changing APIs
-- login throttling per username/IP and per IP
-- per-user assistant request limiting
-- TrustedHost middleware
-- restrictive CSP / frame denial / MIME sniffing protection
-- API docs disabled by default
-- last-active-admin lockout protection
-- document ACL + active/effective lifecycle enforcement
-- upload signature/type/size validation
-- Office macro/OLE/ActiveX/embedded-object rejection
-- PDF active-action checks
-- ZIP bomb/path traversal/symlink protections
-- local AI boundary enforcement
-- HTTP client ignores system proxy environment for AI requests
-- audit logs
-- encrypted backups + integrity-checked restore
-- all sessions invalidated after restore
+DUREM v2 release нь routing, security, memory, API болон policy regression tests-тэй.
 
-See [SECURITY.md](SECURITY.md).
-
-## Backup
-
-Admin → Settings → **Encrypted backup**.
-
-Backup includes:
-
-- SQLite database
-- company documents
-- manifest/checksum metadata
-
-Encrypted `.durem` format:
-
-- AES-256-GCM
-- passphrase-derived key
-- authenticated header
-- database SHA-256 validation
-
-Restore performs archive/path checks, database integrity checks, schema checks, checksum validation, rollback snapshot creation, migration, then forces all users to log in again.
-
-**The backup passphrase is not stored by DUREM.**
-
-## Important production notes
-
-DUREM 2.2 is a production-minded release candidate, not a substitute for infrastructure hardening. Before giving it to an entire organization:
-
-- use HTTPS/TLS
-- set `DUREM_SECURE_COOKIES=true`
-- configure explicit `DUREM_ALLOWED_HOSTS`
-- use BitLocker/LUKS or equivalent disk encryption
-- firewall DUREM/Lemonade to trusted LAN segments
-- keep OS/Python/Lemonade patched
-- keep Lemonade local/private
-- test backup **and restore**
-- review the actual company documents/rules loaded into the system
-
-See [DEPLOYMENT.md](DEPLOYMENT.md).
-
-## Test status
-
-Release-candidate validation includes:
-
-- Python compile check
-- frontend JavaScript syntax check
-- HTML ID/reference static check
-- automated tests
-- API smoke covering authentication, deterministic decision, knowledge ingestion/preview, encrypted backup/restore, and session invalidation
-
-See [BUILD-REPORT.md](BUILD-REPORT.md).
-
-## Admin password reset
-
-If the local admin password is forgotten, do **not** write a plaintext password directly into SQLite. DUREM stores Argon2id password hashes. Stop DUREM, then run:
+Test хийх:
 
 ```powershell
-.\reset-admin.ps1
+.\.venv\Scripts\python.exe -m pytest -q
 ```
 
-On Windows you can also double-click `reset-admin.bat`. The tool asks for the username (defaults to `admin`) and a new password, updates the Argon2id hash, re-enables the account, revokes all existing sessions for that user, and writes a security audit entry.
+---
 
-The SQLite database is stored at `data/durem.db` unless `DUREM_DATA_DIR` is overridden.
+# 📂 Important Files
 
-### Clean distribution note (rc3)
+```text
+README.md
+API.md
+ARCHITECTURE.md
+SECURITY.md
+DEPLOYMENT.md
+CHANGELOG.md
+BUILD-REPORT.md
+```
 
-The distributable ZIP intentionally contains **no prebuilt `data/durem.db` and no `bootstrap_admin.txt`**. `setup.ps1` creates the database and first admin locally on the target machine. This prevents test credentials or test database state from being shipped to customers.
+---
+
+# 🐶 DUREM AI
+
+**Local. Private. Company-aware.**
+
+> DUREM бол зүгээр нэг chatbot биш.  
+> Компанийн дүрмийг баталгаатай эх сурвалжаар шалгадаг,  
+> хэрэглэгч бүрийг тусгаарладаг,  
+> personal memory-г company authority-оос салгадаг,  
+> мөн ердийн AI assistant шиг ярилцаж чаддаг local AI system.
