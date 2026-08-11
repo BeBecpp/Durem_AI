@@ -1,0 +1,26 @@
+services:
+  durem:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      DUREM_HOST: 0.0.0.0
+      LEMONADE_BASE_URL: http://host.docker.internal:13305
+    volumes:
+      - durem_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=512m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  durem_data:

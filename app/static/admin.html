@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#11182b" />
+  <title>DUREM AI — Admin Console</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="admin-body">
+<div class="admin-app">
+  <aside class="admin-sidebar">
+    <a class="brand brand-on-dark admin-brand" href="/">
+      <span class="brand-mascot"><img src="/static/mascot.svg" alt="" /></span>
+      <span class="brand-copy"><strong>DUREM AI</strong><small>Admin Console</small></span>
+    </a>
+    <div class="admin-company-card"><span class="company-orb"></span><div><small>Workspace</small><strong id="companyName">Танай байгууллага</strong></div></div>
+
+    <nav class="admin-nav" id="adminNav">
+      <div class="admin-nav-label">Удирдлага</div>
+      <button class="active" data-section="dashboard"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg></span><span>Тойм</span></button>
+      <button data-section="documents"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 11h6M9 15h6"/></svg></span><span>Knowledge</span></button>
+      <button data-section="rules"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7M18 11v7M15 15h6"/></svg></span><span>Decision rules</span></button>
+      <button data-section="organization"><span class="nav-svg"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M17 7h4M19 5v4"/></svg></span><span>Байгууллага</span></button>
+      <button data-section="routing"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M5 5h6v6H5zM13 13h6v6h-6zM11 8h4a3 3 0 013 3v2M8 11v5a3 3 0 003 3h2"/></svg></span><span>Хариуцлага</span></button>
+      <div class="admin-nav-label">Чанар & аюулгүй байдал</div>
+      <button data-section="gaps"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3zM12 9v4M12 17h.01"/></svg></span><span>Knowledge gaps</span><span class="nav-count" id="gapNavCount">0</span></button>
+      <button data-section="audit"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span>Audit log</span></button>
+      <button data-section="security"><span class="nav-svg"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6zM9 12l2 2 4-5"/></svg></span><span>Security</span></button>
+      <button data-section="settings"><span class="nav-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5v-3l-2-.7-.8-1.9.9-1.9-2.1-2.1-1.9.9-1.9-.8L10.5 2h-3l-.7 2-1.9.8-1.9-.9L.9 6l.9 1.9L1 9.8l-2 .7v3l2 .7.8 1.9-.9 1.9L3 20.1l1.9-.9 1.9.8.7 2h3l.7-2 1.9-.8 1.9.9 2.1-2.1-.9-1.9.8-1.9z" transform="translate(2.5 0) scale(.8)"/></svg></span><span>Тохиргоо</span></button>
+    </nav>
+
+    <div class="admin-sidebar-foot">
+      <a href="/" class="sidebar-action"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><span>Дүрмээ рүү буцах</span></a>
+      <button id="logoutBtn" class="sidebar-action"><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h9"/></svg><span>Гарах</span></button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-top-left">
+        <button class="icon-btn mobile-only" id="mobileMenu" aria-label="Цэс нээх"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <div><small class="admin-breadcrumb">DUREM AI / Admin</small><h1 id="pageTitle">Тойм</h1></div>
+      </div>
+      <div class="admin-top-actions">
+        <span class="runtime-badge"><span class="runtime-dot" id="healthDot"></span><span id="healthText">AI шалгаж байна</span></span>
+        <a class="topbar-open-chat" href="/"><span>Дүрмээтэй чатлах</span><svg viewBox="0 0 24 24"><path d="M8 5h11v11M19 5L5 19"/></svg></a>
+        <span class="admin-user-pill" id="adminUser">Admin</span>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <section class="section-view active" id="section-dashboard">
+        <div class="section-hero compact-hero">
+          <div><span class="section-kicker">CONTROL CENTER</span><h2>Өнөөдөр DUREM ямар байна?</h2><p>Knowledge, decision engine, хэрэглэгч, AI runtime болон security-ийн төлөвийг нэг дор хяна.</p></div>
+          <button class="secondary-action" id="refreshDashboard"><svg viewBox="0 0 24 24"><path d="M20 6v6h-6M4 18v-6h6M6.5 8a7 7 0 0111.2-1.8L20 12M4 12l2.3 5.8A7 7 0 0017.5 16"/></svg>Шинэчлэх</button>
+        </div>
+        <div class="stats-grid premium" id="statsGrid"></div>
+        <div class="admin-dashboard-grid">
+          <div class="panel-card span-2">
+            <div class="panel-title-row"><div><span class="panel-kicker">ACTIVITY</span><h3>Сүүлийн үйлдлүүд</h3></div><span class="soft-pill">Live audit</span></div>
+            <div id="recentActivity" class="activity-list"></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-title-row"><div><span class="panel-kicker">SYSTEM</span><h3>Runtime health</h3></div></div>
+            <div class="system-checks">
+              <div><span>Local LLM</span><strong id="checkLlm">—</strong></div>
+              <div><span>Database</span><strong id="checkDb">—</strong></div>
+              <div><span>Embeddings</span><strong id="checkEmbed">—</strong></div>
+              <div><span>Audit trail</span><strong>Enabled</strong></div>
+              <div><span>External AI</span><strong class="safe-text">None</strong></div>
+            </div>
+          </div>
+          <div class="panel-card security-mini" id="securityMini">
+            <div class="panel-title-row"><div><span class="panel-kicker">SECURITY</span><h3>Security posture</h3></div><strong id="securityMiniScore">—</strong></div>
+            <div class="security-meter"><span id="securityMiniBar"></span></div>
+            <p id="securityMiniText">Security checks ачаалж байна…</p>
+            <button class="text-action" data-jump="security">Security console →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-view" id="section-documents">
+        <div class="section-hero"><div><span class="section-kicker">KNOWLEDGE BASE</span><h2>Компанийн мэдлэгийг удирдах</h2><p>PDF, DOCX, XLSX, TXT, MD, CSV баримтыг local index-д оруулж, version, visibility, effective date-аар хяна.</p></div><button class="primary-action" id="addDocumentBtn">＋ Баримт оруулах</button></div>
+        <div class="knowledge-health" id="knowledgeHealth"><div class="knowledge-health-loading">Knowledge health шалгаж байна…</div></div>
+        <div class="toolbar premium-toolbar"><div class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg><input id="documentSearch" placeholder="Баримт, category, filename хайх…" /></div><div class="toolbar-meta"><span class="soft-pill" id="documentCount">0 баримт</span><span class="soft-pill green">Local index</span></div></div>
+        <div class="doc-grid" id="documentGrid"></div>
+      </section>
+
+      <section class="section-view" id="section-rules">
+        <div class="section-hero"><div><span class="section-kicker">DECISION ENGINE</span><h2>Тодорхой дүрэм, тодорхой шийдвэр</h2><p>Critical босго, зөвшөөрөл, role/department scope-ийг deterministic rule болгон удирдана.</p></div><button class="primary-action" id="addRuleBtn">＋ Дүрэм нэмэх</button></div>
+        <div class="toolbar premium-toolbar"><div class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg><input id="ruleSearch" placeholder="Дүрэм, keyword, category хайх…" /></div><span class="soft-pill" id="ruleCount">0 дүрэм</span></div>
+        <div class="rule-grid" id="ruleGrid"></div>
+      </section>
+
+      <section class="section-view" id="section-organization">
+        <div class="section-hero"><div><span class="section-kicker">ORGANIZATION</span><h2>Хэрэглэгч, role, хэлтэс</h2><p>DUREM AI хариултаа хэрэглэгчийн албан тушаал, хэлтэс, эрхийн хүрээнд scope хийнэ.</p></div><button class="primary-action" id="addUserBtn">＋ Хэрэглэгч</button></div>
+        <div class="panel-card table-panel"><div class="panel-title-row"><div><span class="panel-kicker">EMPLOYEES</span><h3>Хэрэглэгчид</h3></div><span class="soft-pill" id="userCount"></span></div><div class="table-wrap premium-table"><table><thead><tr><th>Хэрэглэгч</th><th>Username</th><th>Хэлтэс</th><th>Role</th><th>Төлөв</th><th></th></tr></thead><tbody id="userTable"></tbody></table></div></div>
+        <div class="two-col-grid">
+          <div class="panel-card"><div class="panel-title-row"><div><span class="panel-kicker">DEPARTMENTS</span><h3>Хэлтэс</h3></div><button class="small-action" id="addDepartmentBtn">＋ Нэмэх</button></div><div id="departmentList" class="manage-list"></div></div>
+          <div class="panel-card"><div class="panel-title-row"><div><span class="panel-kicker">ROLES</span><h3>Roles</h3></div><button class="small-action" id="addRoleBtn">＋ Нэмэх</button></div><div id="roleList" class="manage-list"></div></div>
+        </div>
+      </section>
+
+      <section class="section-view" id="section-routing">
+        <div class="section-hero"><div><span class="section-kicker">ROUTING</span><h2>“Хэнээс асуух вэ?”-г тохируулах</h2><p>Topic, keyword, хэлтэс, role, хариуцах хүнийг холбож ажилтныг зөв газар руу чиглүүлнэ.</p></div><button class="primary-action" id="addResponsibilityBtn">＋ Routing нэмэх</button></div>
+        <div class="rule-grid" id="responsibilityGrid"></div>
+      </section>
+
+      <section class="section-view" id="section-gaps">
+        <div class="section-hero"><div><span class="section-kicker">KNOWLEDGE QUALITY</span><h2>DUREM хариулж чадаагүй асуултууд</h2><p>NOT_FOUND болсон асуултуудаас knowledge base-ийн цоорхойг олж, шинэ дүрэм эсвэл баримт нэм.</p></div><button class="secondary-action" id="refreshGaps">↻ Шинэчлэх</button></div>
+        <div class="panel-card table-panel"><div class="panel-title-row"><div><span class="panel-kicker">UNANSWERED</span><h3>Сүүлийн knowledge gaps</h3></div><span class="soft-pill amber" id="gapCount">0 gap</span></div><div id="gapList" class="gap-list"></div></div>
+      </section>
+
+      <section class="section-view" id="section-audit">
+        <div class="section-hero"><div><span class="section-kicker">AUDIT TRAIL</span><h2>Бүх чухал үйлдэл бүртгэгдэнэ</h2><p>Нэвтрэлт, AI decision, document, rule, settings, feedback, security event-үүдийг шалгана.</p></div><button class="secondary-action" id="refreshAudit">↻ Шинэчлэх</button></div>
+        <div class="panel-card table-panel"><div class="table-wrap premium-table"><table><thead><tr><th>Цаг</th><th>Хэрэглэгч</th><th>Төрөл</th><th>Үйлдэл</th><th>Дэлгэрэнгүй</th></tr></thead><tbody id="auditTable"></tbody></table></div></div>
+      </section>
+
+      <section class="section-view" id="section-security">
+        <div class="section-hero"><div><span class="section-kicker">SECURITY CENTER</span><h2>Local AI-гаа аюулгүй ажиллуулах</h2><p>Session, cookie, secret, trusted host, upload hardening, local AI boundary-ийн төлөвийг нэг дор шалга.</p></div><button class="secondary-action" id="refreshSecurity">↻ Шинэчлэх</button></div>
+        <div class="security-hero-card">
+          <div class="security-score-ring" id="securityScoreRing"><strong id="securityScore">—</strong><small>Security score</small></div>
+          <div><span class="panel-kicker">POSTURE</span><h3 id="securityHeadline">Security checks ачаалж байна…</h3><p>LAN production-д HTTPS, secure cookies, trusted hosts-оо идэвхжүүлээрэй.</p><div class="security-quick-stats"><span><strong id="failedLoginCount">—</strong>failed login / 24h</span><span><strong id="negativeFeedbackCount">—</strong>negative feedback / 7d</span></div></div>
+        </div>
+        <div class="two-col-grid security-grid">
+          <div class="panel-card"><div class="panel-title-row"><div><span class="panel-kicker">CHECKS</span><h3>Security controls</h3></div></div><div id="securityChecks" class="security-check-list"></div></div>
+          <div class="panel-card"><div class="panel-title-row"><div><span class="panel-kicker">SESSIONS</span><h3>Идэвхтэй session</h3></div><span class="soft-pill" id="sessionCount">0</span></div><div id="sessionList" class="session-list"></div></div>
+          <div class="panel-card"><div class="panel-title-row"><div><span class="panel-kicker">APP API</span><h3>Bearer app sessions</h3></div><span class="soft-pill" id="apiTokenCount">0</span></div><div id="apiTokenList" class="session-list"></div></div>
+        </div>
+      </section>
+
+      <section class="section-view" id="section-settings">
+        <div class="section-hero"><div><span class="section-kicker">SYSTEM</span><h2>DUREM AI тохиргоо</h2><p>Компанийн нэр, local model, embedding, backup болон runtime мэдээллийг удирдана.</p></div></div>
+        <div class="settings-grid">
+          <form class="panel-card settings-card" id="settingsForm">
+            <div class="panel-title-row"><div><span class="panel-kicker">AI CONFIG</span><h3>AI & байгууллага</h3></div></div>
+            <label class="admin-field">Компанийн нэр<input id="settingCompany" required /></label>
+            <label class="admin-field">LLM model<input id="settingModel" required /><small>Жишээ: Qwen3-8B-GGUF</small></label>
+            <label class="admin-field">Embedding model<input id="settingEmbedding" required /><small>Монгол semantic search-д local embedding model.</small></label>
+            <label class="admin-field">Semantic embedding<select id="settingEmbeddingEnabled"><option value="true">Enabled</option><option value="false">Disabled — lexical only</option></select></label>
+            <div class="settings-subhead"><span class="panel-kicker">ASSISTANT MODE</span><strong>Conversational AI</strong><small>Policy path нь эх сурвалжтай хэвээр; general chat retrieval шаардахгүй.</small></div>
+            <label class="admin-field">Ердийн чат<select id="settingGeneralChat"><option value="true">Enabled</option><option value="false">Disabled</option></select><small>Brainstorm, тайлбар, бичих тусламж, ердийн асуулт.</small></label>
+            <label class="admin-field">Automatic routing<select id="settingAutoRouting"><option value="true">Enabled — recommended</option><option value="false">Disabled — Auto mode policy path руу орно</option></select></label>
+            <label class="admin-field">Hybrid router<select id="settingHybridRouter"><option value="true">Enabled — ambiguous prompt дээр local Qwen classifier</option><option value="false">Disabled — deterministic only</option></select><small>Тодорхой prompt дээр нэмэлт inference хийхгүй. Зөвхөн эргэлзээтэй prompt-ийг classifier шалгана.</small></label>
+            <label class="admin-field">Personal memory<select id="settingPersonalMemory"><option value="true">Enabled — local per-user</option><option value="false">Disabled</option></select><small>Preference/context л хадгална; company policy authority болохгүй.</small></label>
+            <label class="admin-field">Chat history window<input id="settingChatHistory" type="number" min="4" max="40" step="1" /><small>Model руу өгөх хамгийн их recent message. 16 recommended.</small></label>
+            <label class="admin-field">Raw general-chat audit<select id="settingRawChatAudit"><option value="false">Off — recommended</option><option value="true">On</option></select><small>Off үед prompt text биш зөвхөн route/latency/length metadata хадгална.</small></label>
+            <div class="settings-subhead"><span class="panel-kicker">APP API</span><strong>Mobile / desktop API</strong><small>Versioned /api/v1 endpoints + Bearer token auth.</small></div>
+            <label class="admin-field">App API access<select id="settingApiAccess"><option value="true">Enabled</option><option value="false">Disabled — revoke active API tokens</option></select></label>
+            <label class="admin-field">API token lifetime<input id="settingApiTokenTtl" type="number" min="1" max="365" step="1" /><small>Өдөр. Mobile/desktop app bearer session-ийн хугацаа.</small></label>
+            <div class="inline-error" id="settingsError" hidden></div><div class="inline-success" id="settingsSuccess" hidden></div>
+            <button class="primary-action" type="submit">Тохиргоо хадгалах</button>
+          </form>
+          <div class="settings-side-stack">
+            <div class="panel-card settings-card"><div class="panel-title-row"><div><span class="panel-kicker">RUNTIME</span><h3>System facts</h3></div></div><div id="systemFacts" class="system-facts"></div></div>
+            <div class="panel-card settings-card backup-card"><div class="panel-title-row"><div><span class="panel-kicker">BACKUP & RECOVERY</span><h3>Encrypted local backup</h3></div><span class="soft-pill green">AES-256-GCM</span></div><p class="muted-copy">Database + documents + manifest-ийг passphrase-аар шифрлэсэн <strong>.durem</strong> backup болгоно. Restore хийхэд бүх session автоматаар хаагдана.</p><div class="backup-actions"><button class="secondary-action full" id="backupBtn">↓ Encrypted backup</button><button class="secondary-action full danger-outline" id="restoreBtn">↻ Backup restore</button></div><p class="settings-note">Passphrase сервер дээр хадгалагдахгүй. Алдвал encrypted backup-аа сэргээх боломжгүй.</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="admin-modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><span class="modal-kicker" id="modalKicker">DUREM Admin</span><h2 id="modalTitle"></h2></div><button class="icon-btn" id="modalClose"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+<script src="/static/admin.js"></script>
+</body>
+</html>

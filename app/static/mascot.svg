@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Дүрмээ — DUREM AI mascot</title>
+  <desc id="desc">Хуульчийн зангиа, жижиг тэмдэг зүүсэн хөөрхөн нохой.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef2ff"/>
+      <stop offset="1" stop-color="#e0f2fe"/>
+    </linearGradient>
+  </defs>
+  <circle cx="120" cy="120" r="108" fill="url(#bg)"/>
+  <g>
+    <path d="M65 88c-24-8-36 3-33 21 3 18 19 38 41 42l12-50z" fill="#a96f43"/>
+    <path d="M175 88c24-8 36 3 33 21-3 18-19 38-41 42l-12-50z" fill="#a96f43"/>
+    <path d="M54 109c0-49 29-78 66-78s66 29 66 78v28c0 43-28 75-66 75s-66-32-66-75z" fill="#d99a63"/>
+    <path d="M73 72c10-25 27-37 47-37 22 0 39 13 49 39-12-9-28-14-49-14-20 0-35 4-47 12z" fill="#b7794b" opacity=".75"/>
+    <ellipse cx="120" cy="139" rx="44" ry="42" fill="#f5d8b8"/>
+    <ellipse cx="93" cy="111" rx="7" ry="9" fill="#192033"/>
+    <ellipse cx="147" cy="111" rx="7" ry="9" fill="#192033"/>
+    <circle cx="91" cy="108" r="2" fill="#fff"/>
+    <circle cx="145" cy="108" r="2" fill="#fff"/>
+    <path d="M111 132c3-7 15-7 18 0 2 5-2 12-9 12s-11-7-9-12z" fill="#2c2230"/>
+    <path d="M104 151c5 8 27 8 32 0" fill="none" stroke="#6d4335" stroke-width="5" stroke-linecap="round"/>
+    <path d="M120 143v7" stroke="#6d4335" stroke-width="4" stroke-linecap="round"/>
+    <path d="M93 181c12 7 42 7 54 0l-8 30H101z" fill="#fff"/>
+    <path d="M113 184h14l7 10-14 18-14-18z" fill="#4f62dc"/>
+    <path d="M88 186c-10 5-17 13-20 27h104c-3-14-10-22-20-27-14 12-50 12-64 0z" fill="#14213c"/>
+    <circle cx="161" cy="185" r="15" fill="#f6c453" stroke="#fff" stroke-width="4"/>
+    <path d="M156 185l4 4 7-9" fill="none" stroke="#3a4d7d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

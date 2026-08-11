@@ -1,0 +1,14 @@
+# Example only. Replace ai.company.local with the real internal DNS name.
+# `tls internal` uses Caddy's private CA; client devices must trust that CA.
+
+ai.company.local {
+    tls internal
+
+    encode zstd gzip
+
+    header {
+        -Server
+    }
+
+    reverse_proxy 127.0.0.1:8080
+}

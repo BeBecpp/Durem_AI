@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#f7f8fb" />
+  <title>DUREM AI — Company-aware local AI assistant</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="employee-body">
+<div class="chat-app">
+  <aside class="chat-sidebar" id="sidebar">
+    <div class="sidebar-brand-row">
+      <a class="brand brand-on-dark" href="/">
+        <span class="brand-mascot"><img src="/static/mascot.svg" alt="" /></span>
+        <span class="brand-copy"><strong>DUREM AI</strong><small>Company-aware assistant</small></span>
+      </a>
+      <button class="icon-btn dark-only desktop-collapse" id="collapseSidebar" aria-label="Sidebar хураах" title="Sidebar хураах">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+      </button>
+    </div>
+
+    <button class="new-chat-button" id="newChatBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Шинэ яриа</span><kbd>Ctrl K</kbd>
+    </button>
+
+    <div class="sidebar-company">
+      <span class="company-orb"></span>
+      <div><small>Байгууллага</small><strong id="companyName">Танай байгууллага</strong></div>
+    </div>
+
+    <div class="sidebar-section-label">Сүүлийн яриа</div>
+    <div class="conversation-list" id="conversationList" aria-label="Сүүлийн ярианууд"></div>
+
+    <div class="sidebar-bottom">
+      <a class="sidebar-action" href="/admin" id="adminLink" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg><span>Admin console</span>
+      </a>
+      <button class="sidebar-user" id="userMenuBtn" aria-haspopup="dialog">
+        <span class="user-avatar" id="avatar">U</span>
+        <span class="user-copy"><strong id="userName">User</strong><small id="userRole">Role</small></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="chat-main">
+    <header class="chat-topbar">
+      <button class="icon-btn mobile-only" id="mobileMenu" aria-label="Цэс нээх"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="topbar-title">
+        <span class="mascot-dot"><img src="/static/mascot.svg" alt="" /></span>
+        <div><strong>Дүрмээ</strong><small>Компанийн дүрэм мэддэг local AI assistant</small></div>
+      </div>
+      <div class="topbar-actions">
+        <span class="runtime-badge" title="Local AI runtime"><span class="runtime-dot" id="healthDot"></span><span id="healthText">Шалгаж байна</span></span>
+        <button class="icon-btn" id="infoBtn" aria-label="DUREM AI мэдээлэл"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button>
+      </div>
+    </header>
+
+    <section class="chat-scroll" id="chatScroll">
+      <div class="chat-thread" id="chatThread">
+        <section class="chat-welcome" id="welcome">
+          <div class="welcome-mascot-wrap">
+            <img class="welcome-mascot" src="/static/mascot.svg" alt="Дүрмээ mascot" />
+            <span class="welcome-badge">LOCAL · PRIVATE</span>
+          </div>
+          <div class="welcome-kicker">Сайн уу 👋 Би Дүрмээ</div>
+          <h1>Дүрэм мэддэг.<br><span>Бас ярилцаж чадна.</span></h1>
+          <p>Компанийн дүрэм асуувал батлагдсан эх сурвалжаар шалгана. Харин brainstorm, тайлбар, бичих тусламж, код, ердийн ярианд document хайхгүйгээр local AI-тай шууд ярилцана.</p>
+
+          <div class="assistant-capability-row">
+            <span><b>Auto</b> зөв route-аа сонгоно</span>
+            <span><b>Дүрэм</b> source-backed</span>
+            <span><b>Чат</b> natural conversation</span>
+          </div>
+
+          <div class="starter-grid assistant-starters">
+            <button class="starter-card" data-mode="policy" data-q="Би харилцагчид 8% хөнгөлөлт шууд өгч болох уу?">
+              <span class="starter-icon violet"><svg viewBox="0 0 24 24"><path d="M8 12l3 3 6-7"/><circle cx="12" cy="12" r="9"/></svg></span>
+              <span><strong>Компанийн дүрэм</strong><small>Эрх, зөвшөөрөл, журам</small></span><svg class="starter-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+            <button class="starter-card" data-mode="chat" data-q="Энэ email-ийг илүү товч, мэргэжлийн болгож өг.">
+              <span class="starter-icon blue"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span>
+              <span><strong>Бичих тусламж</strong><small>Email, текст, найруулга</small></span><svg class="starter-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+            <button class="starter-card" data-mode="chat" data-q="Надад шинэ бүтээгдэхүүний 5 practical санаа brainstorm хийгээд өг.">
+              <span class="starter-icon amber"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8 14c-1-1-2-3-2-5a6 6 0 1112 0c0 2-1 4-2 5l-1 2H9z"/></svg></span>
+              <span><strong>Brainstorm</strong><small>Санаа, хувилбар, төлөвлөгөө</small></span><svg class="starter-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+            <button class="starter-card" data-mode="chat" data-q="FastAPI dependency injection-ийг энгийн жишээгээр тайлбарла.">
+              <span class="starter-icon green"><svg viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg></span>
+              <span><strong>Тайлбар & код</strong><small>Ойлголт, жишээ, debugging</small></span><svg class="starter-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+
+          <div class="trust-strip">
+            <span><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6zM9 12l2 2 4-5"/></svg>Local only</span>
+            <span><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>Company-aware</span>
+            <span id="welcomeMemoryTrust"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 015 5v2a4 4 0 012 3.5A4.5 4.5 0 0114.5 18H14a4 4 0 01-7.5-1.8A4 4 0 017 8.5 5 5 0 0112 3z"/></svg>Personal memory</span>
+          </div>
+        </section>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <div class="composer-dock">
+      <div class="mode-pills mode-pills-three" id="modeRow" aria-label="Assistant mode">
+        <button class="mode-pill active" data-mode="auto"><span class="mode-dot"></span>Автомат</button>
+        <button class="mode-pill" data-mode="policy"><span class="mode-dot"></span>Компанийн дүрэм</button>
+        <button class="mode-pill" data-mode="chat"><span class="mode-dot"></span>Ердийн чат</button>
+      </div>
+      <div class="composer-shell">
+        <textarea id="question" rows="1" maxlength="5000" placeholder="Дүрэм асуу, brainstorm хий, эсвэл зүгээр ярилц…" aria-label="DUREM AI-д асуулт бичих"></textarea>
+        <div class="composer-row">
+          <div class="composer-meta"><span id="modeHint">Auto routing</span><span class="meta-sep">•</span><span id="modelPill">Local model</span></div>
+          <button class="send-button" id="askBtn" aria-label="Илгээх"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+        </div>
+      </div>
+      <div class="composer-footnote">Company-policy хариулт эх сурвалжтай байна. General chat нь компанийн authority биш.</div>
+      <div class="inline-error" id="askError" hidden></div>
+    </div>
+  </main>
+</div>
+
+<div class="sheet-backdrop" id="profileSheet" hidden>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="sheet-head"><div><small>DUREM account</small><h2 id="profileTitle">Миний тохиргоо</h2></div><button class="icon-btn" data-close-sheet="profileSheet" aria-label="Хаах"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="profile-card"><span class="user-avatar large" id="profileAvatar">U</span><div><strong id="profileName">User</strong><small id="profileRole">Role</small></div></div>
+    <div class="profile-section-label">Personal AI</div>
+    <button class="sheet-row" id="showMemoryBtn"><span><strong>Personal memory</strong><small id="memoryStatus">Local · зөвхөн таны account</small></span><span>›</span></button>
+    <button class="sheet-row" id="clearMemoryBtn"><span><strong>Memory цэвэрлэх</strong><small>Хадгалсан preference/context-оо мартуулах</small></span><span>›</span></button>
+    <div class="profile-section-label">Account</div>
+    <button class="sheet-row" id="changePasswordBtn"><span><strong>Нууц үг солих</strong><small>Бүх session автоматаар гарна</small></span><span>›</span></button>
+    <a class="sheet-row" href="/admin" id="profileAdminLink" hidden><span><strong>Admin console</strong><small>Knowledge, дүрэм, AI controls</small></span><span>›</span></a>
+    <button class="sheet-row danger-row" id="logoutBtn"><span><strong>Гарах</strong><small>Энэ төхөөрөмжийн session-ийг хаах</small></span><span>›</span></button>
+  </section>
+</div>
+
+<div class="sheet-backdrop" id="passwordSheet" hidden>
+  <section class="sheet compact" role="dialog" aria-modal="true" aria-labelledby="passwordTitle">
+    <div class="sheet-head"><div><small>Security</small><h2 id="passwordTitle">Нууц үг солих</h2></div><button class="icon-btn" data-close-sheet="passwordSheet"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <form id="passwordForm" class="sheet-form">
+      <label>Одоогийн нууц үг<input id="currentPassword" type="password" autocomplete="current-password" required /></label>
+      <label>Шинэ нууц үг<input id="newPassword" type="password" autocomplete="new-password" minlength="12" required /></label>
+      <p class="form-help">12+ тэмдэгт, жижиг/том үсэг, тоо, тусгай тэмдэгтийн дор хаяж 3 төрлийг ашиглана.</p>
+      <div class="inline-error" id="passwordError" hidden></div><button class="primary-wide" type="submit">Нууц үг шинэчлэх</button>
+    </form>
+  </section>
+</div>
+
+<div class="sheet-backdrop" id="sourceSheet" hidden>
+  <section class="sheet source-sheet" role="dialog" aria-modal="true" aria-labelledby="sourceTitle">
+    <div class="sheet-head"><div><small>Эх сурвалж</small><h2 id="sourceTitle">Баримт</h2></div><button class="icon-btn" data-close-sheet="sourceSheet"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="sourceContent" class="source-preview"></div>
+  </section>
+</div>
+
+<div class="sheet-backdrop" id="infoSheet" hidden>
+  <section class="sheet compact" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="sheet-head"><div><small>DUREM AI</small><h2 id="infoTitle">2 замтай assistant</h2></div><button class="icon-btn" data-close-sheet="infoSheet"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="info-stack">
+      <div><span>1</span><p><strong>Auto routing.</strong> Асуулт company-policy эсэхийг server талд ялгана.</p></div>
+      <div><span>2</span><p><strong>Policy path.</strong> Rule Engine + RAG + ACL + exact-source validation ажиллана.</p></div>
+      <div><span>3</span><p><strong>General chat.</strong> Document retrieval шаардахгүй multi-turn local AI conversation.</p></div>
+      <div><span>4</span><p><strong>Personal memory.</strong> Таны preference/context-ийг local account дээр санана; company rule гэж хэзээ ч ашиглахгүй.</p></div>
+    </div>
+  </section>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

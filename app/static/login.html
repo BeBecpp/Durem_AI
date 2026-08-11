@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#11182b" />
+  <title>DUREM AI — Нэвтрэх</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="login-body">
+<main class="login-shell">
+  <section class="login-visual">
+    <div class="login-brand">
+      <span class="brand-mascot large"><img src="/static/mascot.svg" alt="" /></span>
+      <div><strong>DUREM AI</strong><small>Local company intelligence</small></div>
+    </div>
+    <div class="login-hero-copy">
+      <span class="eyebrow">PRIVATE • LOCAL • SOURCE-BACKED</span>
+      <h1>Компанийн дүрэм,<br><span>яг хэрэгтэй мөчид.</span></h1>
+      <p>Дүрэм, зөвшөөрөл, процесс, хариуцах хүнийг нэг газраас асуу. DUREM AI танай баримтаас эх сурвалжтай хариулна.</p>
+      <div class="login-trust-grid">
+        <div><span>01</span><strong>Local AI</strong><small>Өгөгдөл дотоод орчинд үлдэнэ</small></div>
+        <div><span>02</span><strong>Role-aware</strong><small>Ажилтны эрх, хэлтсийг харгалзана</small></div>
+        <div><span>03</span><strong>Safe by default</strong><small>Мэдэхгүй зүйлээ зохиохгүй</small></div>
+      </div>
+    </div>
+    <div class="login-mascot-card">
+      <img src="/static/mascot.svg" alt="Дүрмээ, DUREM AI-ийн хуульч нохой mascot" />
+      <div><strong>Дүрмээ</strong><p>“Асуух зүйл байвал надаас асуугаарай. Баримтаа би шалгачихъя.”</p></div>
+    </div>
+  </section>
+
+  <section class="login-form-side">
+    <form class="login-card" id="loginForm">
+      <div class="login-mobile-brand"><img src="/static/mascot.svg" alt="" /><strong>DUREM AI</strong></div>
+      <span class="form-kicker">Тавтай морил</span>
+      <h2>Байгууллагын аккаунтаар нэвтрэх</h2>
+      <p>Таны role, хэлтэс, зөвшөөрөгдсөн knowledge-аар хариулт scope хийгдэнэ.</p>
+      <label class="login-field">Нэвтрэх нэр<input id="username" autocomplete="username" required /></label>
+      <label class="login-field">Нууц үг
+        <span class="password-wrap"><input id="password" type="password" autocomplete="current-password" required /><button type="button" id="togglePassword" aria-label="Нууц үг харуулах">Харах</button></span>
+      </label>
+      <div class="inline-error" id="errorBox" hidden></div>
+      <button class="login-submit" id="loginBtn" type="submit">DUREM AI-д нэвтрэх <span>→</span></button>
+      <div class="login-security-note"><span>◆</span><p><strong>Private workspace.</strong> Session cookie HttpOnly, CSRF хамгаалалттай.</p></div>
+    </form>
+    <footer class="login-footer">DUREM AI 2.2 · Компанийн дүрэм. Шууд хариулт.</footer>
+  </section>
+</main>
+<script src="/static/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+.venv
+.env
+.git
+.pytest_cache
+**/__pycache__
+*.pyc
+*.pyo
+data/durem.db
+data/durem.db-*
+data/bootstrap_admin.txt
+data/documents/*
+data/backups/*
+!data/documents/.gitkeep
+!data/backups/.gitkeep
+DUREM-AI-*.zip
